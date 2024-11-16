@@ -443,3 +443,17 @@
     >&nbsp;
   </div>
 </div>
+
+## Docker Usage
+
+To build and run the application using Docker:
+
+1. Clone the repository
+2. Copy `.env.example` to `.env` and fill in your credentials
+3. Build the Docker image:
+
+`docker build -t answer-discussion .`
+
+4. Run the Docker image:
+
+`docker run --env-file .env answer-discussion`

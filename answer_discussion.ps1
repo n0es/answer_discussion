@@ -1,5 +1,5 @@
 $envFilePath = ".\.env"
-$jarFilePath = ".\answer_discussion.jar"
+$jarFilePath = ".\target\answer_discussion-1.0-SNAPSHOT.jar"
 
 # Check if the .env file exists
 if (-Not (Test-Path $envFilePath)) {
