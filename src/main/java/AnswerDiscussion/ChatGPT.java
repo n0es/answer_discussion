@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 public class ChatGPT {
   static HttpClient client = HttpClient.newHttpClient();
   static String API_KEY = System.getenv("OPENAI_KEY");
+  static String API_URL = System.getenv("OPENAI_URL") != null ? System.getenv("OPENAI_URL") : "https://api.openai.com/v1/chat/completions";
   String model;
   String prompt;
   JSONObject body;
@@ -33,7 +34,7 @@ public class ChatGPT {
         )
       );
     this.request = HttpRequest.newBuilder()
-      .uri(URI.create("https://api.openai.com/v1/chat/completions"))
+      .uri(URI.create(API_URL))
       .header("Content-Type", "application/json")
       .header("Authorization", "Bearer " + API_KEY)
       .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
@@ -42,7 +43,7 @@ public class ChatGPT {
 
   public String getResponse() {
     this.request = HttpRequest.newBuilder()
-      .uri(URI.create("https://api.openai.com/v1/chat/completions"))
+      .uri(URI.create(API_URL))
       .header("Content-Type", "application/json")
       .header("Authorization", "Bearer " + API_KEY)
       .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
