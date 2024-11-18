@@ -173,6 +173,10 @@ public class Canvas {
       }
     }
 
+    if (newestTopic == null) {
+      throw new RuntimeException("No discussion topics found");
+    }
+
     return newestTopic;
   }
 
@@ -190,6 +194,10 @@ public class Canvas {
         newestEpoch = epoch;
         newestTopic = topic;
       }
+    }
+
+    if (newestTopic == null) {
+      throw new RuntimeException("No discussion topics found");
     }
 
     return newestTopic;
