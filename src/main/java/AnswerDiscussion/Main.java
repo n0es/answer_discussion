@@ -4,8 +4,9 @@ import org.json.JSONObject;
 
 
 public class Main {
+  static String classId = System.getenv("CLASS_ID");
   public static void main(String[] args) {
-    Canvas canvas = new Canvas("33973");
+    Canvas canvas = new Canvas(classId);
     JSONObject discussion = canvas.getFirstDiscussionTopic();
     JSONObject file = canvas.getFirstFile();
     System.out.println("newest discussion: "+discussion.get("title")+" - "+discussion.get("id"));
