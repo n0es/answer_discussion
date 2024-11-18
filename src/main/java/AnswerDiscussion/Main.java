@@ -17,11 +17,14 @@ public class Main {
 
     ChatGPT chatGPT = new ChatGPT(prompt);
     System.out.println("Sending prompt to ChatGPT...");
-    String response = chatGPT.getResponse();
-    System.out.println(response);
+    String AIResponse = chatGPT.getResponse();
+    System.out.println(AIResponse);
 
 
-//    JSONObject response = canvas.postDiscussionEntry("188636", "Testing from IntelliJ");
-//    System.out.println(response);
+    canvas.postDiscussionEntry(
+      Integer.toString(discussion.getInt("id")),
+      AIResponse
+    );
+    System.out.println("Posted AI response to discussion!");
   }
 }

@@ -130,12 +130,12 @@ public class Canvas {
     return newestTopic;
   }
 
-  public JSONObject postDiscussionEntry(String topicId, String message) {
+  public void postDiscussionEntry(String topicId, String message) {
     RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
       .addFormDataPart("message", message)
       .build();
     Request request = buildPostRequest("/discussion_topics/" + topicId + "/entries", body);
-    return new JSONObject(sendRequest(request).toString());
+    sendRequest(request);
   }
 
   String downloadFile(String url, String fileName) {
