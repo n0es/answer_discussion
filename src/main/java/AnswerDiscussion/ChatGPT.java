@@ -8,10 +8,19 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+class utils {
+  static String or(String a, String b) {
+    return a != null ? a : b;
+  }
+}
+
 public class ChatGPT {
   static HttpClient client = HttpClient.newHttpClient();
   static String API_KEY = System.getenv("OPENAI_KEY");
-  static String API_URL = System.getenv("OPENAI_URL") != null ? System.getenv("OPENAI_URL") : "https://api.openai.com/v1/chat/completions";
+  static String API_URL = utils.or(
+    System.getenv("OPENAI_URL"),
+    "https://api.openai.com/v1/chat/completions"
+  );
   String model;
   String prompt;
   JSONObject body;
