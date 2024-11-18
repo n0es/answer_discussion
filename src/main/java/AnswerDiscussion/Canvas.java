@@ -12,6 +12,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 public class Canvas {
   static OkHttpClient client = new OkHttpClient().newBuilder().build();
   static String CANVAS_TOKEN = System.getenv("CANVAS_TOKEN");
@@ -19,6 +22,10 @@ public class Canvas {
 
   public Canvas(String classId) {
     this.classId = classId;
+    JSONObject course = getCourse();
+    if (!course.get("id").toString().equals(classId)) {
+      throw new RuntimeException("Invalid class ID");
+    }
   }
 
   Request buildPostRequest(String uri, RequestBody body) {
@@ -40,15 +47,32 @@ public class Canvas {
   ResponseBody sendRequest(Request request) {
     try {
       Response response = client.newCall(request).execute();
-      if (!response.isSuccessful()) {
-        throw new RuntimeException("Unexpected response: " + response);
-      } else if (response.body() == null) {
-        throw new RuntimeException("Response body is empty");
-      } else {
-        return response.body();
+      
+      // Handle common HTTP status codes
+      switch (response.code()) {
+        case 200:
+        case 201:
+          if (response.body() == null) {
+            throw new RuntimeException("Response body is empty");
+          }
+          return response.body();
+        case 401:
+          throw new RuntimeException("Unauthorized: Please check your Canvas API token");
+        case 403:
+          throw new RuntimeException("Forbidden: You don't have permission to access this resource");
+        case 404:
+          throw new RuntimeException("Not Found: The requested resource doesn't exist");
+        case 429:
+          throw new RuntimeException("Rate Limited: Too many requests. Please try again later");
+        default:
+          throw new RuntimeException("HTTP " + response.code() + ": " + response.message());
       }
+    } catch (IOException e) {
+      throw new RuntimeException("Network error: " + e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw e; // Re-throw runtime exceptions without wrapping
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
     }
   }
 
@@ -57,6 +81,20 @@ public class Canvas {
       return response.string();
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  public JSONObject getCourse() {
+    try {
+      Request request = buildGetRequest("");
+      ResponseBody response = sendRequest(request);
+      String body = bodyToString(response);
+      return new JSONObject(body);
+    } catch (RuntimeException e) {
+      if (e.getMessage().contains("Not Found")) {
+        throw new RuntimeException("Course does not exist");
+      }
+      throw e;
     }
   }
 
@@ -111,6 +149,14 @@ public class Canvas {
     return new JSONArray(body);
   }
 
+  public JSONArray getAllDiscussionTopics() {
+    Request request = buildGetRequest("/discussion_topics");
+    ResponseBody response = sendRequest(request);
+    String body = bodyToString(response);
+
+    return new JSONArray(body);
+  }
+
   public JSONObject getFirstDiscussionTopic() {
     JSONArray topics = getDiscussionTopics();
     JSONObject newestTopic = null;
@@ -130,12 +176,31 @@ public class Canvas {
     return newestTopic;
   }
 
-  public JSONObject postDiscussionEntry(String topicId, String message) {
+  public JSONObject getAnyDiscussionTopic() {
+    JSONArray topics = getAllDiscussionTopics();
+    JSONObject newestTopic = null;
+    long newestEpoch = 0;
+
+    for (int i = 0; i < topics.length(); i++) {
+      JSONObject topic = topics.getJSONObject(i);
+      String postedAt = topic.getString("posted_at");
+      long epoch = java.time.Instant.parse(postedAt).toEpochMilli();
+
+      if (epoch > newestEpoch) {
+        newestEpoch = epoch;
+        newestTopic = topic;
+      }
+    }
+
+    return newestTopic;
+  }
+
+  public void postDiscussionEntry(String topicId, String message) {
     RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
       .addFormDataPart("message", message)
       .build();
     Request request = buildPostRequest("/discussion_topics/" + topicId + "/entries", body);
-    return new JSONObject(sendRequest(request).toString());
+    sendRequest(request);
   }
 
   String downloadFile(String url, String fileName) {

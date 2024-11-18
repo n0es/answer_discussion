@@ -14,11 +14,4 @@ Get-Content $envFilePath | ForEach-Object {
     Set-Item -Path "Env:\$name" -Value $value
 }
 
-# Verify that the JAR file exists
-if (-Not (Test-Path $jarFilePath)) {
-    Write-Error "The JAR file was not found at path: $jarFilePath"
-    exit 1
-}
-
-# Run the Java application
-java -jar $jarFilePath
+mvn test
