@@ -2,9 +2,9 @@ name: Answer_Discussion Tests
 
 on:
   push:
-    branches: [ CICD-plus-Docker ]
+    branches: [ main ]
   pull_request:
-    branches: [ CICD-plus-Docker ]
+    branches: [ main ]
 
 jobs:
   test:
